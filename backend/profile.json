@@ -1,0 +1,145 @@
+{
+  "name": "Lucas Debize",
+  "role": "Étudiant Epitech - Dev IA / Full-Stack",
+  "tagline": "Développeur en devenir, passionné de code & d'IA",
+  "availability": "Recherche part-time (4-5 mois), disponible immédiatement",
+  "location": "Lyon, France",
+  "bio": "Étudiant en informatique en 5ème année à Epitech Lyon (diplôme attendu 2027), avec une 4ème année réalisée à Epitech Berlin. Je conçois des projets concrets en intelligence artificielle, web et développement logiciel : architecture propre, interfaces soignées, logique technique. Approche concrète, code structuré et attention portée à l'expérience utilisateur.",
+  "languages": [
+    { "name": "Français", "level": "Maternel" },
+    { "name": "Anglais", "level": "Courant (C1)" }
+  ],
+  "skills": {
+    "languages": ["C", "C++", "Python", "JavaScript", "HTML/CSS", "Dart", "PHP"],
+    "frameworks": ["React.js", "Vue.js", "Node.js", "Flutter"],
+    "databases": ["PostgreSQL", "MySQL"],
+    "tools": ["Git", "GitLab", "Docker", "Linux", "Bash", "UE5"],
+    "domains": ["Intelligence artificielle", "NLP", "Classification", "Développement web", "Développement logiciel"]
+  },
+  "interests": [
+    "Intelligence artificielle",
+    "Culture générale",
+    "Jeu d'échecs"
+  ],
+  "stats": {
+    "projects": 9,
+    "domains": 3,
+    "technologies": "32+"
+  },
+  "experience": [
+    {
+      "title": "Développeur Full-Stack - IA (Stage puis Part-Time)",
+      "company": "SBDR Team",
+      "location": "Paris (Full Remote)",
+      "period": "Mars 2025 - Mars 2026",
+      "description": "Développement d'une plateforme SaaS de gestion intelligente d'emails. Intégration d'un algorithme NLP pour trier automatiquement les emails (détection prospection vs intention) avec score de pertinence. Forte autonomie en binôme direct avec le Lead Dev, de la conception BDD à l'interface utilisateur.",
+      "technologies": ["Python", "PostgreSQL", "PHP", "Vue.js", "Dart"]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Prospecthor",
+      "type": "Projet technique",
+      "categories": ["Web", "IA"],
+      "description": "Application de tri d'emails par IA avec scoring d'intention de prospection. Projet réalisé chez SBDR Team.",
+      "technologies": ["Python", "PostgreSQL", "PHP", "Vue.js", "Dart"]
+    },
+    {
+      "name": "RAG Monitor",
+      "type": "Projet personnel",
+      "categories": ["IA"],
+      "description": "Système RAG local complet avec monitoring et pipeline CI/CD automatisée. Question-réponse sur documents avec LLM local et embeddings. Dashboard Streamlit : chat, analytics et monitoring. Évaluation RAGAS, suivi MLflow, déploiement Docker.",
+      "technologies": ["Python", "Streamlit", "Ollama", "ChromaDB", "MLflow", "Docker"],
+      "url": "https://github.com/lucas-debize/rag-monitor"
+    },
+    {
+      "name": "Elyrii",
+      "type": "Projet technique",
+      "categories": ["IA", "Web"],
+      "description": "Mascotte IA mobile pour accompagner les personnes en difficulté émotionnelle. Application Flutter avec backend Node.js et pipeline IA.",
+      "technologies": ["Flutter", "Node.js", "Python", "Kafka", "PostgreSQL"]
+    },
+    {
+      "name": "Assistant RH IA",
+      "type": "Projet technique",
+      "categories": ["IA", "Web"],
+      "description": "Workflow 100% local d'automatisation RH : réception email avec CV PDF, extraction, analyse IA (Ollama), stockage PostgreSQL et notification recruteur. Orchestration n8n.",
+      "technologies": ["n8n", "Ollama", "PostgreSQL", "Docker", "Python"]
+    },
+    {
+      "name": "Chatbot Portfolio",
+      "type": "Projet personnel",
+      "categories": ["Web", "IA"],
+      "description": "Chatbot IA utilisant React, Express et l'API Google Gemini pour répondre aux questions sur mon profil développeur. Base de connaissances JSON injectée dans le prompt système.",
+      "technologies": ["React", "Express", "Node.js", "Gemini"]
+    },
+    {
+      "name": "Image Denoising",
+      "type": "Projet personnel",
+      "categories": ["IA"],
+      "description": "Réseau de neurones entraîné à reconnaitre et reconstruire des images bruitées.",
+      "technologies": ["Python", "Deep Learning"]
+    },
+    {
+      "name": "Image Recognition",
+      "type": "Projet personnel",
+      "categories": ["IA"],
+      "description": "CNN entraînés sur plusieurs datasets pour de la classification multi-classes.",
+      "technologies": ["Python", "CNN"]
+    },
+    {
+      "name": "Chess Game State",
+      "type": "Projet personnel",
+      "categories": ["IA"],
+      "description": "Reconnaissance d'un état de jeu d'échecs à partir d'une image.",
+      "technologies": ["Python", "Computer Vision"]
+    },
+    {
+      "name": "Échecs Multijoueur UE5",
+      "type": "Projet technique",
+      "categories": ["Logiciel"],
+      "description": "Échecs en ligne sur Steam avec factions et pouvoirs spéciaux.",
+      "technologies": ["C++", "UE5"]
+    },
+    {
+      "name": "R-Type",
+      "type": "Projet technique",
+      "categories": ["Logiciel"],
+      "description": "Moteur de jeu réseau multiplateforme codé from scratch en C++.",
+      "technologies": ["C++", "Réseau"]
+    },
+    {
+      "name": "Portfolio",
+      "type": "Projet personnel",
+      "categories": ["Web"],
+      "description": "Site personnel développé from scratch pour présenter mes projets, compétences et parcours.",
+      "technologies": ["HTML", "CSS", "JavaScript"],
+      "url": "https://lucas-debize.github.io/portfolio/"
+    }
+  ],
+  "education": [
+    {
+      "title": "Programme Grande École - Expert en Technologies de l'Information",
+      "school": "Epitech",
+      "location": "Lyon, France",
+      "period": "Septembre 2022 - Présent",
+      "description": "5ème année. Pédagogie active 100% basée sur des projets techniques concrets (architecture logicielle, développement web, algorithmique). 4ème année à l'international à Epitech Berlin. Diplôme attendu en 2027."
+    },
+    {
+      "title": "Classe Préparatoire Intégrée",
+      "school": "ECE",
+      "location": "Lyon, France",
+      "period": "Septembre 2021 - Juin 2022",
+      "description": "Cycle préparatoire au sein d'une école d'ingénieurs spécialisée dans les nouvelles technologies. Bases solides en sciences fondamentales et informatique."
+    }
+  ],
+  "contact": {
+    "email": "lucas.debize@epitech.eu",
+    "phone": "07 82 75 92 01",
+    "portfolio": "https://lucas-debize.github.io/portfolio/",
+    "github": "https://github.com/lucas-debize",
+    "linkedin": "https://linkedin.com/in/lucas-debize",
+    "responseTime": "Sous 24h"
+  },
+  "recruitmentPitch": "Étudiant Epitech orienté IA et full-stack, avec une expérience concrète en entreprise (SBDR Team) sur une plateforme SaaS avec NLP. Je combine développement applicatif, interfaces modernes et expérimentations IA. Autonome, rigoureux et orienté livrables."
+}
