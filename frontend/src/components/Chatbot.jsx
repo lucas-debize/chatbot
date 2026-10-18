@@ -1,15 +1,24 @@
 import { useState, useRef, useEffect } from "react";
 
-const API_URL = "http://localhost:3001/api/chat";
-const AI_STATUS_URL = "http://localhost:3001/api/ai-status";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+const API_URL = `${BACKEND_URL}/api/chat`;
+const AI_STATUS_URL = `${BACKEND_URL}/api/ai-status`;
 const MAX_CHARS = 500;
 
-const SUGGESTIONS = [
+const DEFAULT_SUGGESTIONS = [
   "Quelles sont tes compétences en IA ?",
-  "Parle-moi de Prospecthor et SBDR Team",
+  "Parle-moi de MyAIFactory et SBDR Team",
   "Quels projets personnels as-tu réalisés ?",
-  "Es-tu disponible pour un part-time ?",
-  "Comment te contacter ?",
+  "Quelle est ta disponibilité actuelle ?",
+  "Où puis-je télécharger ton CV ?",
+];
+
+const CUSTOM_SUGGESTIONS = [
+  "Résume ce CV en 3 points clés",
+  "Quelles sont les compétences techniques du candidat ?",
+  "Ce profil correspond-il à un poste de Développeur IA ?",
+  "Quelles sont ses expériences professionnelles ?",
+  "Quels sont ses points forts et axes d'amélioration ?",
 ];
 
 const CONFIG_ERROR_CODES = new Set(["AI_NOT_CONFIGURED", "AI_INVALID_KEY"]);
@@ -21,10 +30,10 @@ function isConfigError(code) {
 const INITIAL_MESSAGE = {
   role: "assistant",
   content:
-    "Bonjour ! Je suis l'assistant portfolio de Lucas Debize, étudiant Epitech orienté IA et full-stack. Posez-moi des questions sur ses compétences, projets (RAG Monitor, Elyrii, Assistant RH IA), expérience ou disponibilité.",
+    "Bonjour ! Je suis l'assistant portfolio de Lucas Debize, étudiant Epitech orienté IA et full-stack. Posez-moi des questions sur ses compétences, projets (Prospecthor, RAG Monitor, Elyrii, Assistant RH IA), expérience ou disponibilité.",
 };
 
-function Chatbot() {
+function Chatbot({ customProfile }) {
   const [messages, setMessages] = useState([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,6 +42,23 @@ function Chatbot() {
   const [aiStatusMessage, setAiStatusMessage] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const lastSendTimeRef = useRef(0);
+
+  // Synchronise le message de bienvenue et l'état quand un profil personnalisé est chargé/réinitialisé
+  useEffect(() => {
+    if (customProfile) {
+      setMessages([
+        {
+          role: "assistant",
+          content: `Mode analyse de document actif pour « ${
+            customProfile.name || customProfile.filename || "le CV personnalisé"
+          } ». Posez-moi toutes vos questions sur ce profil (compétences, parcours, résumé, adéquation avec un poste...) !`,
+        },
+      ]);
+    } else {
+      setMessages([INITIAL_MESSAGE]);
+    }
+  }, [customProfile]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -49,7 +75,7 @@ function Chatbot() {
             setAiAvailable(false);
             setAiStatusMessage(
               data.error ||
-                "L'IA Gemini est indisponible. Vérifiez la configuration du backend."
+                "L'IA est indisponible. Vérifiez la configuration du backend (Groq ou Gemini)."
             );
           }
         }
@@ -68,6 +94,11 @@ function Chatbot() {
     const messageText = (text || input).trim();
     if (!messageText || loading) return;
 
+    // Anti-flood client-side (1,5 s de délai minimal)
+    const now = Date.now();
+    if (now - lastSendTimeRef.current < 1500) return;
+    lastSendTimeRef.current = now;
+
     setError(null);
     setInput("");
     setMessages((prev) => [...prev, { role: "user", content: messageText }]);
@@ -77,18 +108,27 @@ function Chatbot() {
       const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: messageText }),
+        body: JSON.stringify({
+          message: messageText,
+          ...(customProfile ? { customProfile } : {}),
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 429 || data.code === "RATE_LIMIT_EXCEEDED") {
+          throw new Error(
+            data.error ||
+              "Limite de débit atteinte. Veuillez patienter une minute avant d'envoyer un nouveau message."
+          );
+        }
         if (isConfigError(data.code)) {
           setAiAvailable(false);
           setAiStatusMessage(data.error);
         }
         throw new Error(
-          data.error || "L'IA Gemini est indisponible. Réessayez plus tard."
+          data.error || "L'IA est indisponible. Réessayez plus tard."
         );
       }
 
@@ -120,7 +160,18 @@ function Chatbot() {
   }
 
   function handleReset() {
-    setMessages([INITIAL_MESSAGE]);
+    if (customProfile) {
+      setMessages([
+        {
+          role: "assistant",
+          content: `Mode analyse de document réinitialisé pour « ${
+            customProfile.name || customProfile.filename || "le CV personnalisé"
+          } ». Que souhaitez-vous savoir ?`,
+        },
+      ]);
+    } else {
+      setMessages([INITIAL_MESSAGE]);
+    }
     setInput("");
     setError(null);
     inputRef.current?.focus();
@@ -133,6 +184,8 @@ function Chatbot() {
     }
   }
 
+  const suggestions = customProfile ? CUSTOM_SUGGESTIONS : DEFAULT_SUGGESTIONS;
+
   return (
     <div className="chatbot">
       <div className="chatbot-header">
@@ -144,9 +197,13 @@ function Chatbot() {
           </svg>
         </div>
         <div>
-          <h2 className="chatbot-title">Assistant portfolio</h2>
+          <h2 className="chatbot-title">
+            {customProfile ? "Analyseur de CV IA" : "Assistant portfolio"}
+          </h2>
           <p className="chatbot-subtitle">
-            Réponses générées par Gemini à partir du CV et du portfolio
+            {customProfile
+              ? `Document actif : ${customProfile.name || customProfile.filename || "CV Personnalisé"}`
+              : "Réponses générées par IA (Groq / Gemini) à partir du profil et du CV"}
           </p>
         </div>
         <button
@@ -177,51 +234,41 @@ function Chatbot() {
                 <span className="avatar avatar--bot">IA</span>
               )}
             </div>
-            <div className="message-content">
-              <span className="message-label">
-                {msg.role === "user" ? "Vous" : "Assistant"}
-              </span>
-              <div className="message-bubble">
-                <p>{msg.content}</p>
-              </div>
+            <div className="message-bubble">
+              <p className="message-text">{msg.content}</p>
             </div>
           </div>
         ))}
 
         {loading && (
-          <div className="message message--assistant">
+          <div className="message message--assistant message--loading" aria-label="L'assistant répond">
             <div className="message-avatar" aria-hidden="true">
               <span className="avatar avatar--bot">IA</span>
             </div>
-            <div className="message-content">
-              <span className="message-label">Assistant</span>
-              <div className="message-bubble">
-                <div className="loader" aria-label="Réponse en cours">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
+            <div className="message-bubble">
+              <div className="typing-indicator" aria-hidden="true">
+                <span />
+                <span />
+                <span />
               </div>
             </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="chat-error" role="alert">
+            <p>{error}</p>
           </div>
         )}
 
         <div ref={messagesEndRef} />
       </div>
 
-      {error && (
-        <div className="error-banner" role="alert">
-          <span>{error}</span>
-          <button onClick={() => setError(null)} aria-label="Fermer">
-            ×
-          </button>
-        </div>
-      )}
-
       <div className="suggestions" aria-label="Suggestions de questions">
-        {SUGGESTIONS.map((suggestion) => (
+        {suggestions.map((suggestion) => (
           <button
             key={suggestion}
+            type="button"
             className="suggestion-btn"
             onClick={() => sendMessage(suggestion)}
             disabled={loading || !aiAvailable}
@@ -240,8 +287,10 @@ function Chatbot() {
             onChange={handleInputChange}
             placeholder={
               aiAvailable
-                ? "Ex : Parle-moi de ton projet RAG Monitor"
-                : "IA indisponible, configurez Gemini pour envoyer un message"
+                ? customProfile
+                  ? "Ex : Quels sont les points forts de ce profil ?"
+                  : "Ex : Parle-moi de ton expérience chez MyAIFactory"
+                : "IA indisponible, configurez GROQ_API_KEY ou GEMINI_API_KEY"
             }
             disabled={loading || !aiAvailable}
             maxLength={MAX_CHARS}

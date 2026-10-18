@@ -1,10 +1,36 @@
-# Chatbot Portfolio IA
+# Chatbot Portfolio IA (Groq & Fallback Gemini)
 
-Chatbot utilisant React, Express et l'API Google Gemini pour répondre aux questions sur mon profil développeur.
+Assistant virtuel intelligent pour portfolio de développeur, conçu avec React, Express et un moteur d'IA hybride **Groq (Llama 3.3 70B)** avec repli automatique sur **Google Gemini**.
 
-Le backend charge `profile.json` comme base de connaissances et injecte son contenu dans le prompt système Gemini.
+---
 
-## Aperçu
+## 🚀 Accès Rapide
+
+### 1. Démo en direct (Sans installation ni clé API)
+Pour les recruteurs et visiteurs souhaitant tester directement le portfolio et son univers :
+👉 **[Accéder au portfolio en ligne](https://lucas-debize.github.io/portfolio/)**  
+*(CV officiel également accessible directement : [Télécharger le CV](https://lucas-debize.github.io/portfolio/assets/images/CV.pdf))*
+
+### 2. Test en local (Développeurs & Évaluateurs)
+Une seule commande suffit pour tout installer et démarrer :
+
+```bash
+# 1. Cloner et configurer l'environnement
+cp backend/.env.example backend/.env
+# Renseignez votre GROQ_API_KEY (gsk_...) ou GEMINI_API_KEY dans backend/.env
+
+# 2. Installation de toutes les dépendances (racine, backend, frontend)
+npm run setup
+
+# 3. Démarrage simultané du backend (port 3001) et du frontend (port 5173)
+npm run dev
+```
+
+Ouvrez ensuite [http://localhost:5173](http://localhost:5173).
+
+---
+
+## 📸 Aperçu
 
 Interface desktop :
 
@@ -12,125 +38,164 @@ Interface desktop :
 
 Conversation avec l'assistant IA :
 
-![Exemple de conversation avec Gemini](assets/chat-demo.png)
+![Exemple de conversation avec l'assistant](assets/chat-demo.png)
 
-## Stack
+---
 
-| Couche   | Technologie             |
-| -------- | ----------------------- |
-| Frontend | React + Vite            |
-| Backend  | Node.js + Express       |
-| Données  | profile.json            |
-| IA       | Google Gemini           |
+## 🛠️ Stack & Architecture
 
-## Architecture
+| Couche | Technologie | Rôle |
+| :--- | :--- | :--- |
+| **Frontend** | React 19 + Vite 6 | Interface chat réactive avec stream & suggestions |
+| **Backend** | Node.js + Express | API REST, orchestration IA, validation de tokens |
+| **Moteur IA Principal** | **Groq (Llama 3.3 70B)** | Réponses ultra-rapides (~200ms), modèle de pointe |
+| **Moteur IA Secours** | **Google Gemini** | Fallback automatique en cas de rate-limit ou indisponibilité |
+| **Données Profil** | `profile.json` + `CV.pdf` | Contexte injecté dynamiquement dans le prompt système |
+| **Orchestration** | `concurrently` | Lancement et arrêt unifiés des services en un seul terminal |
+
+### Schéma d'exécution & Fallback
 
 ```
-Utilisateur -> React (5173) -> Express (3001) -> Gemini API -> Réponse
+                    ┌─────────────────────────┐
+                    │  Utilisateur / Navigateur│
+                    └───────────┬─────────────┘
+                                │ HTTP / Vite (5173)
+                                ▼
+                    ┌─────────────────────────┐
+                    │   Backend Express (3001)│
+                    └───────────┬─────────────┘
+                                │
+                 ┌──────────────┴──────────────┐
+                 ▼ (Prioritaire)               ▼ (Secours si indisponible/429)
+       ┌──────────────────┐          ┌──────────────────┐
+       │   Groq Cloud     │          │  Google Gemini   │
+       │(Llama 3.3 70B /  │          │(Flash Lite /     │
+       │  Llama 3.1 8B)   │          │  3.6 Flash)      │
+       └──────────────────┘          └──────────────────┘
 ```
 
-## Prérequis
+---
 
-- Node.js 18+
-- Clé API Gemini via [Google AI Studio](https://aistudio.google.com/apikey)
+## ⚙️ Configuration (`backend/.env`)
 
-## Installation
-
-```bash
-cd chatbot/backend
-npm install
-cp .env.example .env
-```
-
-Configurer `.env` :
+Le fichier `backend/.env.example` détaille les options disponibles :
 
 ```env
-GEMINI_API_KEY=votre_cle_ici
+# Moteur principal recommandé (Groq - Llama 3.3 70B, ultra-rapide)
+GROQ_API_KEY=gsk_votre_cle_groq_ici
+GROQ_MODEL=llama-3.3-70b-versatile
+
+# Moteur de secours (Google Gemini)
+GEMINI_API_KEY=votre_cle_gemini_ici
 GEMINI_MODEL=gemini-flash-lite-latest
+
+# Liaison CV Portfolio (Local ou Production)
+CV_URL=https://lucas-debize.github.io/portfolio/assets/images/CV.pdf
+
+# Optionnel : chemin vers un fichier de profil personnalisé (défaut : ./profile.json)
+PROFILE_PATH=
+
 PORT=3001
 ```
 
-Les clés récentes Google AI Studio commencent par `AQ.`. Les anciennes clés commencent par `AIza`.
+- **Clé Groq** : Obtenez une clé gratuite sur [console.groq.com/keys](https://console.groq.com/keys) (format `gsk_...`).
+- **Clé Gemini** : Obtenez une clé sur [Google AI Studio](https://aistudio.google.com/apikey) (format `AIza...` ou `AQ...`).
+- Vous pouvez renseigner uniquement l'une des deux clés ou les deux pour bénéficier de la bascule automatique à tolérance de panne.
 
-Modèles recommandés (niveau sans frais) : `gemini-flash-lite-latest`, `gemini-3.6-flash`, `gemini-flash-latest`.
+---
 
-Le backend bascule automatiquement sur un modèle de repli si le modèle configuré est indisponible.
+## 🌐 Déploiement Prêt à l'Emploi (Zero-Rewrite)
 
-```bash
-cd ../frontend
-npm install
-```
+Le frontend et le backend sont architecturés pour être déployés ou intégrés dans un portfolio existant sans modifier une seule ligne de code source.
 
-Personnaliser le profil dans `backend/profile.json`.
+### 1. Déploiement du Backend (Render, Railway, Fly.io ou VPS)
+1. Déployez le dossier `backend/` sur votre plateforme de choix (ex: Render Web Service).
+2. Configurez les variables d'environnement dans le dashboard de la plateforme :
+   - `GROQ_API_KEY=gsk_...`
+   - `GEMINI_API_KEY=...` (optionnel pour fallback)
+   - `CV_URL=https://lucas-debize.github.io/portfolio/assets/images/CV.pdf`
+3. Récupérez l'URL publique de votre backend (ex: `https://mon-chatbot-backend.onrender.com`).
 
-## Lancement
+### 2. Déploiement du Frontend (GitHub Pages, Vercel ou intégration portfolio)
+1. Lors du build du frontend, définissez la variable d'environnement `VITE_BACKEND_URL` :
+   ```bash
+   VITE_BACKEND_URL=https://mon-chatbot-backend.onrender.com npm run build
+   ```
+2. Le frontend interrogera automatiquement votre backend en production, tout en continuant à cibler `http://localhost:3001` en local par défaut.
 
-Terminal 1, backend :
+---
 
-```bash
-cd chatbot/backend
-npm run dev
-```
+## 🔌 Points d'Entrée API
 
-Terminal 2, frontend :
+### `POST /api/chat`
+Envoie un message à l'assistant.
 
-```bash
-cd chatbot/frontend
-npm run dev
-```
-
-Ouvrir [http://localhost:5173](http://localhost:5173).
-
-## API
-
-### POST /api/chat
-
+**Requête :**
 ```json
-{ "message": "Quels sont tes projets ?" }
+{
+  "message": "Quels sont tes projets en IA ?"
+}
 ```
 
-Réponse :
-
+**Réponse (Succès 200) :**
 ```json
-{ "reply": "..." }
+{
+  "reply": "Lucas a notamment développé Prospecthor (plateforme SaaS avec NLP chez SBDR Team) et RAG Monitor...",
+  "provider": "groq"
+}
 ```
 
-Erreur IA (503) :
-
+**Réponse (Erreur 503) :**
 ```json
-{ "error": "...", "code": "AI_QUOTA_EXCEEDED" }
+{
+  "error": "L'IA n'est pas configurée. Ajoutez une clé GROQ_API_KEY ou GEMINI_API_KEY valide dans backend/.env.",
+  "code": "AI_NOT_CONFIGURED"
+}
 ```
 
-### GET /api/health
+### `GET /api/ai-status`
+Vérifie la disponibilité et les fournisseurs actifs.
 
-Vérifie que le serveur fonctionne.
+**Réponse :**
+```json
+{
+  "available": true,
+  "primaryProvider": "groq",
+  "fallbackAvailable": true,
+  "activeModel": "llama-3.3-70b-versatile"
+}
+```
 
-### GET /api/ai-status
+### `GET /api/health`
+Vérification de l'état de l'application et chargement du profil.
 
-Vérifie la configuration de la clé Gemini.
+---
 
-## Structure
+## 📁 Structure du Projet
 
 ```
-chatbot/
-├── assets/
-│   ├── interface-desktop.png
-│   └── chat-demo.png
+chatbot-portfolio/
+├── package.json          # Orchestrateur racine (scripts setup, dev, build)
+├── README.md             # Guide complet et documentation
+├── assets/               # Captures d'écran et illustrations
 ├── backend/
-│   ├── server.js
-│   ├── profile.json
-│   ├── .env.example
+│   ├── server.js         # API Express, client Groq, fallback Gemini
+│   ├── profile.json      # Base de connaissances du profil et lien CV
+│   ├── .env.example      # Modèle de variables d'environnement
 │   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── App.jsx
-│   │   ├── components/Chatbot.jsx
-│   │   ├── main.jsx
-│   │   └── styles.css
-│   └── package.json
-└── README.md
+└── frontend/
+    ├── index.html
+    ├── vite.config.js
+    ├── package.json
+    └── src/
+        ├── App.jsx
+        ├── components/
+        │   └── Chatbot.jsx  # Composant Chatbot (portable et réutilisable)
+        └── styles.css
 ```
 
-## Licence
+---
 
-MIT
+## 📜 Licence
+
+MIT © [Lucas Debize](https://github.com/lucas-debize)
